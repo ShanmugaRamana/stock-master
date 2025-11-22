@@ -60,15 +60,4 @@ SMTP_PASSWORD=your_app_password
 Developer
 <div style="display: flex; align-items: center; gap: 16px;">
 
-<h3>Shanmuga Ramana</h3>
-
-<div> <div style="margin-top: 8px;"> <a href="mailto:shanmugaramana27@gmail.com" target="_blank" title="Send Email"> <img src="https://img.shields.io/badge/Gmail-D14836?style=for-the-badge&logo=gmail&logoColor=white" alt="Gmail" /> </a> <a href="https://www.linkedin.com/in/your-linkedin-profile" target="_blank" style="margin-left: 8px;"> <img src="https://img.shields.io/badge/LinkedIn-Profile-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn" /> </a> </div> </div>
-
-</div>
-
-
-<p style="margin-top: 12px;"> Feel free to reach out for questions, suggestions, or collaboration opportunities. </p>
-
-⭐️ Star this repo if you found it helpful!
-
 </div>
