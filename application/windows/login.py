@@ -1,10 +1,12 @@
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, messagebox
+import requests
 
 class LoginScreen:
     def __init__(self, root):
         self.root = root
         self.root.title("Login - Stock Master")
+        self.API_URL = "http://127.0.0.1:8000"
         
         self.color_bg_right = "white"
         self.color_primary = "#000000" 
@@ -30,12 +32,11 @@ class LoginScreen:
 
         main_container = tk.Frame(self.root)
         main_container.pack(fill="both", expand=True)
-        
         main_container.grid_columnconfigure(0, weight=1, uniform="half_split")
         main_container.grid_columnconfigure(1, weight=1, uniform="half_split")
         main_container.grid_rowconfigure(0, weight=1)
 
-        # --- LEFT ---
+        # --- LEFT SIDE ---
         self.canvas_left = tk.Canvas(main_container, highlightthickness=0)
         self.canvas_left.grid(row=0, column=0, sticky="nsew")
         self.draw_gradient(self.canvas_left, "#ff9966", "#ff5e62")
@@ -45,7 +46,7 @@ class LoginScreen:
         self.canvas_left.create_text(50, screen_h - 270, text="Seamless Management", font=("Helvetica", 14), fill="#FFF1F2", anchor="w")
         self.canvas_left.create_text(50, screen_h - 180, text="Empower your business\nwith intelligent stock\ncontrol.", font=("Helvetica", 28, "bold"), fill="white", anchor="w", justify="left")
 
-        # --- RIGHT ---
+        # --- RIGHT SIDE ---
         frame_right = tk.Frame(main_container, bg=self.color_bg_right)
         frame_right.grid(row=0, column=1, sticky="nsew")
         
@@ -64,12 +65,12 @@ class LoginScreen:
         self.entry_pass = tk.Entry(login_card, show="*", font=("Helvetica", 11), width=40, bg=self.color_input_bg, relief="flat", highlightthickness=1, highlightbackground=self.color_border, highlightcolor="#333")
         self.entry_pass.pack(ipady=8, pady=(0, 5))
 
-        # --- UPDATED: Command added to Forgot Password button ---
-        btn_forgot = tk.Button(login_card, text="Forgot Password?", font=("Helvetica", 9), fg=self.color_text_sub, bg=self.color_bg_right, activebackground=self.color_bg_right, activeforeground=self.color_primary, cursor="hand2", relief="flat", borderwidth=0, 
-                               command=self.open_forgot) 
+        btn_forgot = tk.Button(login_card, text="Forgot Password?", font=("Helvetica", 9), fg=self.color_text_sub, bg=self.color_bg_right, activebackground=self.color_bg_right, activeforeground=self.color_primary, cursor="hand2", relief="flat", borderwidth=0, command=self.open_forgot)
         btn_forgot.pack(anchor="e", pady=(0, 20))
 
-        btn_login = tk.Button(login_card, text="Login to Dashboard", font=("Helvetica", 11, "bold"), bg=self.color_primary, fg="white", activebackground="#333333", activeforeground="white", cursor="hand2", relief="flat", borderwidth=0)
+        # --- UPDATED LOGIN BUTTON ---
+        btn_login = tk.Button(login_card, text="Login to Dashboard", font=("Helvetica", 11, "bold"), bg=self.color_primary, fg="white", activebackground="#333333", activeforeground="white", cursor="hand2", relief="flat", borderwidth=0, 
+                              command=self.handle_login) # Linked to logic
         btn_login.pack(fill="x", ipady=10)
         
         footer_frame = tk.Frame(login_card, bg=self.color_bg_right)
@@ -80,6 +81,38 @@ class LoginScreen:
         btn_signup.pack(side="left", padx=5)
         
         self.canvas_left.bind("<Configure>", lambda e: self.draw_gradient(self.canvas_left, "#ff9966", "#ff5e62"))
+
+    def handle_login(self):
+        login_id = self.entry_user.get().strip()
+        password = self.entry_pass.get().strip()
+
+        if not login_id or not password:
+            messagebox.showwarning("Input Error", "Please enter both Login ID and Password.")
+            return
+
+        payload = {"login_id": login_id, "password": password}
+
+        try:
+            response = requests.post(f"{self.API_URL}/login", json=payload)
+            
+            if response.status_code == 200:
+                user_data = response.json()
+                # Open Dashboard
+                self.open_dashboard(user_data)
+            else:
+                # Parse Error
+                try:
+                    error_msg = response.json().get("detail", "Login Failed")
+                except:
+                    error_msg = "Login Failed"
+                messagebox.showerror("Error", error_msg)
+
+        except requests.exceptions.ConnectionError:
+             messagebox.showerror("Connection Error", "Cannot connect to server.")
+
+    def open_dashboard(self, user_data):
+        from windows.dashboard import DashboardScreen
+        DashboardScreen(self.root, user_details=user_data)
 
     def open_signup(self):
         from windows.signup import SignupScreen
