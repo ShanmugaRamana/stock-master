@@ -5,7 +5,7 @@ from passlib.context import CryptContext
 import secrets
 from core.database import get_db
 from models.user import User
-from schemas.user import UserCreate, UserResponse, UserLogin
+from schemas.user import UserCreate, UserResponse, UserLogin, UserPasswordUpdate
 from core.email_utils import send_verification_email
 
 router = APIRouter(tags=["Authentication"])
@@ -94,3 +94,20 @@ def login(user_data: UserLogin, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail="Account not verified. Please check your email.")
 
     return {"message": "Login Successful", "user_id": user.id, "username": user.login_id, "email": user.email}
+
+@router.post("/update-password")
+def update_password(data: UserPasswordUpdate, db: Session = Depends(get_db)):
+    # 1. Find User
+    user = db.query(User).filter(User.login_id == data.login_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # 2. Verify Current Password
+    if not verify_password(data.current_password, user.hashed_password):
+        raise HTTPException(status_code=400, detail="Incorrect current password")
+    
+    # 3. Hash and Save New Password
+    user.hashed_password = get_password_hash(data.new_password)
+    db.commit()
+    
+    return {"message": "Password updated successfully"}

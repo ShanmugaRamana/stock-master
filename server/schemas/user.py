@@ -5,10 +5,15 @@ class UserCreate(BaseModel):
     email: EmailStr
     password: str
 
-# --- NEW SCHEMA ---
 class UserLogin(BaseModel):
     login_id: str
     password: str
+
+# --- NEW SCHEMA ---
+class UserPasswordUpdate(BaseModel):
+    login_id: str
+    current_password: str
+    new_password: str
 
 class UserResponse(BaseModel):
     id: int
@@ -16,4 +21,4 @@ class UserResponse(BaseModel):
     email: str
 
     class Config:
-        from_attributes = True # Updated for Pydantic v2 compatibility
+        from_attributes = True
